@@ -57,7 +57,40 @@ const Post = mongoose.model("Post", postSchema);
 /**
  * Start your RESTfull routes definition
  */
+app.get('/', (req, res) => {
+    res.redirect('/posts');
+});
 
+//Index route: starting point for your restfull routes
+app.get('/posts', (req, res) => {
+    Post.find({}, (err, posts) => {
+        if(err) {
+            console.log("Cannot reach your blog posts...");
+            console.log(err);
+        } else {
+            res.render('index', {posts: posts});
+        }
+    });
+});
+
+//New route: displays new post form
+app.get('/posts/new', (req, res) => {
+    res.render('new');
+});
+
+app.post('/posts', (req, res) => {
+    Post.create(req.body.post, (err, post) => {
+        if(err) {
+            console.log("Cannot create your new post!");
+            console.log(err);
+            res.render('new');
+        } else {
+            console.log("New post created");
+            console.log(post);
+            res.redirect('/posts');
+        }
+    })
+});
 
 app.listen(3000, () => {
     console.log("Server running on port 3000");
