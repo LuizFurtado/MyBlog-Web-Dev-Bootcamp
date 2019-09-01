@@ -136,6 +136,19 @@ app.put("/posts/:id", (req, res) => {
   });
 });
 
+//Delete route: find and delete a single item from the database
+app.delete("/posts/:id", (req, res) => {
+  Post.findByIdAndRemove(req.params.id, err => {
+    if (err) {
+      console.log("Cannot delete this post...");
+      console.log(err);
+      res.redirect("/posts/" + req.params.id);
+    } else {
+      res.redirect("/posts");
+    }
+  });
+});
+
 app.listen(3000, () => {
   console.log("Server running on port 3000");
 });

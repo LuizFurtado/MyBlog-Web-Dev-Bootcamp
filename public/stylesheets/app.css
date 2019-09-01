@@ -1,7 +1,11 @@
 main.container.main {
-    margin-top: 7rem;
+  margin-top: 7rem;
 }
 
 i.icon {
-    font-size: 2rem;
+  font-size: 2rem;
+}
+
+#delete {
+  display: inline;
 }
