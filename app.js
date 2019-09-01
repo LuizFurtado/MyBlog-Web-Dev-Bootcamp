@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const methodOVerride = require("method-override");
+const sanitizer = require("express-sanitizer");
 
 /**
  * Basic App Setup
@@ -15,6 +16,7 @@ const app = express();
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(sanitizer());
 app.use(methodOVerride("_method"));
 
 /**
@@ -85,6 +87,8 @@ app.get("/posts/new", (req, res) => {
 
 //Create route: posts a new enty to the database
 app.post("/posts", (req, res) => {
+  req.body.post.body = req.sanitizer(req.body.post.body);
+
   Post.create(req.body.post, (err, post) => {
     if (err) {
       console.log("Cannot create your new post!");
@@ -124,6 +128,8 @@ app.get("/posts/:id/edit", (req, res) => {
 
 //Update route: submit changes made using the edit form to the database, modifying existing item
 app.put("/posts/:id", (req, res) => {
+  req.body.post.body = req.sanitizer(req.body.post.body);
+
   Post.findByIdAndUpdate(req.params.id, req.body.post, (err, post) => {
     if (err) {
       console.log("Cannot update your blog post");

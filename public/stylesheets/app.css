@@ -9,3 +9,7 @@ i.icon {
 #delete {
   display: inline;
 }
+footer {
+  margin-top: 7rem;
+  text-align: center;
+}
