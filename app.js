@@ -1,6 +1,7 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
+const express = require("express");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const methodOVerride = require("method-override");
 
 /**
  * Basic App Setup
@@ -11,9 +12,10 @@ const mongoose = require('mongoose');
  */
 const app = express();
 
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use(bodyParser.urlencoded({extended: true}));
+app.set("view engine", "ejs");
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOVerride("_method"));
 
 /**
  * Mongoose Configurations
@@ -25,22 +27,25 @@ app.use(bodyParser.urlencoded({extended: true}));
  * Initiate your model object and attach it to a schema for mongoose to handle database operations (CRUD)
  */
 
-const uri = 'mongodb+srv://myblog:8n21eVqx7lchmvYs@mongofurtadex-gao43.mongodb.net/myblog?retryWrites=true&w=majority';
+mongoose.set("useFindAndModify", false);
 
-mongoose.connect(uri, {useNewUrlParser: true}, err => {
-    if(err) {
-        console.log("Cannot connect to MongoDB Atlas:");
-        console.log(err);
-    } else {
-        console.log("Connected to MongoDB Atlas")
-    }
+const uri =
+  "mongodb+srv://myblog:8n21eVqx7lchmvYs@mongofurtadex-gao43.mongodb.net/myblog?retryWrites=true&w=majority";
+
+mongoose.connect(uri, { useNewUrlParser: true }, err => {
+  if (err) {
+    console.log("Cannot connect to MongoDB Atlas:");
+    console.log(err);
+  } else {
+    console.log("Connected to MongoDB Atlas");
+  }
 });
 
 const postSchema = new mongoose.Schema({
-    title: String,
-    image: String,
-    body: String,
-    created: {type: Date, default: Date.now}
+  title: String,
+  image: String,
+  body: String,
+  created: { type: Date, default: Date.now }
 });
 
 const Post = mongoose.model("Post", postSchema);
@@ -57,41 +62,80 @@ const Post = mongoose.model("Post", postSchema);
 /**
  * Start your RESTfull routes definition
  */
-app.get('/', (req, res) => {
-    res.redirect('/posts');
+app.get("/", (req, res) => {
+  res.redirect("/posts");
 });
 
 //Index route: starting point for your restfull routes
-app.get('/posts', (req, res) => {
-    Post.find({}, (err, posts) => {
-        if(err) {
-            console.log("Cannot reach your blog posts...");
-            console.log(err);
-        } else {
-            res.render('index', {posts: posts});
-        }
-    });
+app.get("/posts", (req, res) => {
+  Post.find({}, (err, posts) => {
+    if (err) {
+      console.log("Cannot reach your blog posts...");
+      console.log(err);
+    } else {
+      res.render("index", { posts: posts });
+    }
+  });
 });
 
 //New route: displays new post form
-app.get('/posts/new', (req, res) => {
-    res.render('new');
+app.get("/posts/new", (req, res) => {
+  res.render("new");
 });
 
-app.post('/posts', (req, res) => {
-    Post.create(req.body.post, (err, post) => {
-        if(err) {
-            console.log("Cannot create your new post!");
-            console.log(err);
-            res.render('new');
-        } else {
-            console.log("New post created");
-            console.log(post);
-            res.redirect('/posts');
-        }
-    })
+//Create route: posts a new enty to the database
+app.post("/posts", (req, res) => {
+  Post.create(req.body.post, (err, post) => {
+    if (err) {
+      console.log("Cannot create your new post!");
+      console.log(err);
+      res.render("new");
+    } else {
+      console.log("New post created");
+      console.log(post);
+      res.redirect("/posts");
+    }
+  });
+});
+
+//Show route: displays a single post entry
+app.get("/posts/:id", (req, res) => {
+  Post.findById(req.params.id, (err, post) => {
+    if (err) {
+      console.log("Post not found");
+      console.log(err);
+    } else {
+      res.render("show", { post: post });
+    }
+  });
+});
+
+//Edit route: recovers an existing entry from the database and allows editing the item
+app.get("/posts/:id/edit", (req, res) => {
+  Post.findById(req.params.id, (err, post) => {
+    if (err) {
+      console.log("Post now found...");
+      console.log(err);
+    } else {
+      res.render("edit", { post: post });
+    }
+  });
+});
+
+//Update route: submit changes made using the edit form to the database, modifying existing item
+app.put("/posts/:id", (req, res) => {
+  Post.findByIdAndUpdate(req.params.id, req.body.post, (err, post) => {
+    if (err) {
+      console.log("Cannot update your blog post");
+      console.log(err);
+    } else {
+      console.log("Post updated");
+      console.log(post);
+      res.redirect("/posts/" + req.params.id);
+    }
+  });
 });
 
 app.listen(3000, () => {
-    console.log("Server running on port 3000");
+  console.log("Server running on port 3000");
 });

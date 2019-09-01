@@ -1,11 +1,20 @@
 <% include partials/header %>
 <main class="ui main text container segment">
-  <h1 class="ui huge header">Add New Post</h1>
+  <h1 class="ui huge header">Edit <%= post.title %>></h1>
 
-  <form class="ui form" action="/posts" method="POST">
+  <form
+    class="ui form"
+    action="/posts/<%= post._id %>?_method=PUT"
+    method="POST"
+  >
     <div class="field">
       <label for="title">Title</label>
-      <input id="title" type="text" name="post[title]" placeholder="Title" />
+      <input
+        id="title"
+        type="text"
+        name="post[title]"
+        value="<%= post.title %>"
+      />
     </div>
     <div class="field">
       <label for="image">Image URL</label>
@@ -13,18 +22,14 @@
         id="image"
         type="text"
         name="post[image]"
-        placeholder="Image URL"
+        value="<%= post.image %>"
       />
     </div>
     <div class="field">
       <label for="body">Your post</label>
-      <textarea
-        name="post[body]"
-        id="body"
-        cols="30"
-        rows="10"
-        placeholder="Your post content"
-      ></textarea>
+      <textarea name="post[body]" id="body" cols="30" rows="10">
+        <%- post.body %>
+      </textarea>
     </div>
     <input class="ui purple big basic button" type="submit" value="Submit!" />
   </form>
